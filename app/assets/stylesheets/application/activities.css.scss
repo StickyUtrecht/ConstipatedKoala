@@ -1,0 +1,67 @@
+div#participants table, table#participants {
+  td {
+    padding: 2px 10px;
+    vertical-align: middle;
+
+    // header payments page
+    &[colspan='3'] {
+      padding: 20px 10px 2px;
+
+      a {
+        position: relative;
+        left: -8px;
+      }
+    }
+
+    input.price {
+      max-width: 100px;
+    }
+
+    input.participant {
+      width: auto;
+    }
+  }
+
+  td > .btn-group {
+    display: flex;
+    height: 30px;
+    margin: 2px 0 4px 0;
+    padding: 0;
+
+    button, .btn {
+      height: 32px;
+      line-height: 20px;
+      padding: 5px 12px;
+    }
+  }
+}
+
+table td span.badge {
+  height: 100%;
+  display: inline;
+  font-weight: 400;
+}
+
+.in-debt, .in-debt a {
+    color: #e94b3b;
+}
+
+#mail-editor #textarea, #mail-editor textarea#html {
+  font-family: arial;
+  font-size: medium;
+  color: #222;
+  width: 100%;
+  min-height: 300px;
+  margin-bottom: 10px;
+  overflow-y: scroll;
+  display: none;
+}
+
+#mail-editor form.html  textarea#html {
+  display: block;
+  font-size: .9em;
+}
+
+#mail-editor form:not(.html) #textarea {
+  display: block;
+}

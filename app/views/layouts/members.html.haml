@@ -14,73 +14,87 @@
     = stylesheet_link_tag 'members', media: 'all', 'data-turbolinks-track' => 'reload'
     = javascript_include_tag 'members', 'data-turbolinks-track' => 'reload'
 
-    %template#alert
-      .toast{:class => "toast-{1}"}
-        %button.toast-close-button
-          ×
-        .toast-message
-          {0}
-    = csrf_meta_tags
+    = csrf_meta_tag
+
   %body#app
-    %div
-      %section.header.bg-dark
-        %header.clearfix
-          = link_to '#', :class => 'toggle-min d-block d-md-none menu-button' do
-            %i.fa.fa-bars
+    %nav.navbar.navbar-default.navbar-expand-lg{:role => "navigation"}
+      = link_to '#', :class => 'navbar-toggler d-md-none', 'data-toggle': 'collapse', 'data-target': '#navbar-collapse' do
+        %i.fa.fa-bars
 
-          = link_to root_path, :class => 'logo' do
-            %span
-              = t :association_name
+      = link_to root_path, :class => 'navbar-brand' do
+        = t :association_name
 
-          .top-nav
-            .email.d-none.d-md-block
-              %span= current_user.email
+      %ul.nav.collapse.navbar-collapse#navbar-collapse
+        %li{:class => ('active' if yield(:page) == 'home')}
+          = link_to :users_root, class: 'nav-item' do
+            %i.fas.fa-laptop
+            %span.nav-label= I18n.t("navigation.home")
 
-            .d-none.d-md-block
+        %li{:class => ('active' if yield(:page) == 'member')}
+          = link_to :current_member, class: 'nav-item' do
+            %i.far.fa-user-circle
+            %span.nav-label= I18n.t("members.navigation.profile")
+
+        %li{:class => ('active' if yield(:page) == 'activities')}
+          = link_to :activities, class: 'nav-item' do
+            %i.far.fa-calendar-alt
+            %span.nav-label= I18n.t("activerecord.models.activity")
+
+        %li.d-md-none
+          = link_to destroy_user_session_path, 'data-method' => :delete, class: 'nav-item' do
+            %i.fa.fa-sign-out-alt
+            %span.nav-label= I18n.t("members.navigation.sign_out")
+        %li
+          %hr
+
+        %li
+          = link_to "https://fotos.svsticky.nl/" do
+            %i.fas.fa-camera-retro
+            %span.nav-label= I18n.t("members.navigation.pictures")
+
+        %li
+          = link_to "https://files.svsticky.nl/" do
+            %i.far.fa-folder
+            %span.nav-label= I18n.t("members.navigation.files")
+
+        %li
+          = link_to "https://digidecs.svsticky.nl/" do
+            %i.fas.fa-file-invoice
+            %span.nav-label= I18n.t("members.navigation.declarations")
+
+        %li
+          = link_to "https://svsticky.nl/boeken" do
+            %i.fa.fa-book
+            %span.nav-label= I18n.t("members.navigation.books")
+
+        %li
+          = link_to "https://svsticky.nl/carriere/vacatures" do
+            %i.fa.fa-briefcase
+            %span.nav-label= I18n.t("members.navigation.vacancies")
+
+    #page-container
+      .row.d-none.d-md-flex
+        %nav.navbar.navbar-static-top
+
+          -#
+            %ol.breadcrumb
+              %li.breadcrumb-item
+                %a{:href => "#"} Home
+              %li.breadcrumb-item
+                %a{:href => "#"} Library
+              %li.breadcrumb-item.active{"aria-current" => "page"} Data
+
+
+          %ul.nav
+            %li
+              = link_to :current_member do
+                %i.far.fa-user-circle
+                %span.nav-label= current_user.email
+            %li
               = link_to destroy_user_session_path, 'data-method' => :delete do
+                %span.nav-label= I18n.t("members.navigation.sign_out")
                 %i.fa.fa-sign-out-alt
 
-      %aside#sidebar-container{role: 'navigation'}
-        #sidebar-wrapper
-          .list-group.list-group-flush{'data-collapse-nav' => '', 'data-slim-scroll' => '', 'data-highlight-active' => '' }
-            = link_to :root, :class => 'list-group-item list-group-item-action' do
-              %span= I18n.t("navigation.home")
-              %i.fa.fa-desktop{:class => ('active' if yield(:page) == 'home')}
+      = yield
 
-            = link_to activities_path, :class => 'list-group-item list-group-item-action' do
-              %span= I18n.t("activerecord.models.activity")
-              %i.fa.fa-ticket-alt{:class => ('active' if yield(:page) == 'activities')}
-
-            = link_to :users_edit, :class => 'list-group-item list-group-item-action' do
-              %span= I18n.t("members.navigation.edit_profile")
-              %i.fa.fa-user{:class => ('active' if yield(:page) == 'edit')}
-            = link_to '', :class => 'list-group-item list-group-item-action',
-              'data-toggle' => 'collapse', 'href' => '#sub-apps' do
-              %span= I18n.t("members.navigation.links")
-              %i.fa.fa-caret-down
-            .collapse.list-group#sub-apps
-              = link_to "https://fotos.svsticky.nl/", :class => 'list-group-item list-group-item-action' do
-                %span= I18n.t("members.navigation.pictures")
-                %i.fa.fa-camera
-              = link_to "https://files.svsticky.nl/", :class => 'list-group-item list-group-item-action' do
-                %span= I18n.t("members.navigation.files")
-                %i.fa.fa-file
-              = link_to "https://digidecs.svsticky.nl/", :class => 'list-group-item list-group-item-action' do
-                %span= I18n.t("members.navigation.declarations")
-                %i.fa.fa-receipt
-              = link_to "https://svsticky.nl/boeken", :class => 'list-group-item list-group-item-action' do
-                %span= I18n.t("members.navigation.books")
-                %i.fa.fa-book
-              = link_to "https://svsticky.nl/carriere/vacatures", :class => 'list-group-item list-group-item-action' do
-                %span= I18n.t("members.navigation.vacancies")
-                %i.fa.fa-briefcase
-            -# Signout button for mobile
-            = link_to destroy_user_session_path, 'data-method' => :delete, :class => 'list-group-item list-group-item-action d-md-none' do
-              %span= I18n.t("devise.sessions.new.sign_out")
-              %i.fa.fa-sign-out-alt
-      .view-container
-        %section
-          .page#content
-            = yield
-
-    #toast-container.toast-bottom-right
+      #toast-container.toast-bottom-right

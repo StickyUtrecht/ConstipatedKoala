@@ -1,17 +1,16 @@
 - content_for(:page, 'settings')
-
 - content_for(:title, 'Instellingen')
 
 %section#content
 
-  .page.page-form{ :data => { 'authenticity_token' => form_authenticity_token}}
+  .page.page-form
     .row
       .col-md-6
         .card
           .card-header
             %i.fas.fa-fw.fa-wrench
             Instellingen
-          %ul.list-group#settings
+          %ul.card-body.p-0.m-0#settings
             = form_tag settings_url do
 
               %li.list-group-item
@@ -87,6 +86,10 @@
               = f.hidden_field :id, :value => @admin.id, :class => 'id'
 
               .form-group
+                .image-group
+                  - if @admin.avatar.attached?
+                    = image_tag @admin.avatar, class: 'avatar'
+
                 .row
                   .col-md-4
                     %label{for: ''} Voornaam
@@ -98,14 +101,35 @@
                     %label{for: ''} Achternaam
                     = f.text_field :last_name, :value => @admin.last_name, :class => 'form-control'
 
-              .form-group#mail
+                .row
+                  .col-lg-12
+                    = label(:admin, :avatar)
+                    .input-group
+                      %input#output.form-control{ :readonly => '', :value => ("#{@admin.avatar.filename}" if @admin.avatar.attached?) }
+
+                      .input-group-append
+                        %div.btn.btn-primary.file-input-wrapper
+                          %span
+                            = I18n.t('files.upload')
+                          = f.file_field :avatar, { 'data-ui-file-upload' => '' }
+                      .input-group-append
+                        %button.btn.btn-primary.dropdown-toggle{ 'data-toggle' => 'dropdown', :type => 'button', :class => ( 'disabled' unless @admin.avatar.attached? ) }
+                          %span.caret
+                        %ul.dropdown-menu
+                          %li
+                            - if @admin.avatar.attached?
+                              = link_to 'Download', @admin.avatar, :download => '', :class => 'dropdown-item'
+                          %li.divider
+                          %li
+                            = link_to I18n.t('files.delete'), '#', :class => 'dropdown-item remove'
+
+              .form-group.signature
+                = f.hidden_field :signature, value: @admin.signature
+
                 %label{for: ''} Ondertekening
-                = render 'layouts/partials/editor'
 
-                #textarea.form-control{ :contenteditable => 'true' }
+                #editor
                   != @admin.signature
-
-                = f.text_area :signature, :rows => 8, :value => @admin.signature, :class => 'form-control', :id => 'html'
 
               %button.btn.btn-success{type: 'submit'} Opslaan
 
@@ -120,41 +144,33 @@
           .card-header
             %i.fa.fa-fw.fa-fw.fa-desktop
             Advertenties
-          .card-body
-            .table-responsive
-              %table.table.table-bordered.table-striped.table-linked
+          %table.table.table-striped.card-body
+            - @advertisements.each do |advertisement|
+              %tr{ :data => { 'id' => advertisement.id }}
+                %td
+                  = advertisement.name
+                  %br
+                  = link_to advertisement.poster.filename, advertisement.poster.representation(resize: '764x1080!'), :download => ''
+                %td.btn-group.float-right
+                  %button.btn.btn-light
+                    %i.fa.fa-fw.fa-trash
 
-                - @advertisements.each do |advertisement|
-                  %tr{ :data => { 'id' => advertisement.id }}
-                    %td
-                      = advertisement.name
-                      = link_to advertisement.poster.filename, advertisement.poster.representation(resize: '764x1080!'), :download => ''
-                    %td.buttons
-                      .btn-group
-                        %button.btn.btn-default.destroy
-                          %i.fa.fa-fw.fa-trash-o
-
+          .card-footer
             = form_for :advertisement, url: advertisement_settings_path, method: :post, :class => 'form-validation' do |f|
-              .form-group
+              .form-group.m-0
                 .input-group
                   = f.text_field :name, { :class => 'form-control', :placeholder => 'Omschrijving' }
-              %div{ :style => 'margin-left: 5px;' }
-                %div.btn.btn-primary.file-input-wrapper
-                  %span Uploaden
-                  = f.file_field :poster, { 'data-ui-file-upload' => '' }
-                %button.btn.btn-success.wait{type: 'submit'} Opslaan
+                  %div.btn.btn-primary.file-input-wrapper
+                    %span Uploaden
+                    = f.file_field :poster, { 'data-ui-file-upload' => '' }
+                  %button.btn.btn-success.wait{type: 'submit'} Opslaan
 
         .card
           .card-header
             %i.fa.fa-fw.fa-rocket
             Externe applicaties
-          %table.table.table-striped.table-linked
+          %table.table.table-striped.card-body
             - @applications.each do |application|
               %tr
                 %td= link_to application.name, application.redirect_uri
                 %td= application.redirect_uri
-
-:javascript
-  $(document).on('ready page:load turbolinks:load', function(){
-    $('form.signature').editor();
-  });

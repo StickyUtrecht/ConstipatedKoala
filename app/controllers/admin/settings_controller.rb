@@ -76,17 +76,14 @@ class Admin::SettingsController < ApplicationController
   end
 
   def logs
-    @limit = params[:limit] ? params[:limit].to_i : 50
-
-    @impressions = Impression.all.order(created_at: :desc)
-                             .paginate(page: params[:page], per_page: params[:limit] ||= 50)
+    @pagination, @impressions = pagy(Impression.all.order(created_at: :desc), items: params[:limit] ||= 50)
     @total_log_items = Impression.count
   end
 
   private
 
   def member_post_params
-    params.require(:admin).permit(:first_name, :infix, :last_name, :signature)
+    params.require(:admin).permit(:first_name, :infix, :last_name, :avatar, :signature)
   end
 
   def advertisement_post_params

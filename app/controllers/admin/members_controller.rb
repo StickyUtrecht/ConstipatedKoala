@@ -1,40 +1,15 @@
 #:nodoc:
 class Admin::MembersController < ApplicationController
-  # replaced with calls in each of the methods
-  # impressionist :actions => [ :create, :update ]
 
   def index
-    @limit = params[:limit] ? params[:limit].to_i : 50
-
     if params[:search].present?
-      @search = params[:search]
-
-      params[:page] ||= 1
-      @page = params[:page].to_i
-
-      params[:limit] ||= 50
-      @limit = params[:limit].to_i
-      offset = (@page - 1) * @limit
-
-      @members = Member.search(@search.clone, offset, @limit)
-
-      redirect_to @members.first if @members.size == 1 && @page == 1
+      @pagination, @members = pagy_array(Member.search(params[:search].clone))
 
     else
-      @members =
-        Member
-        .includes(:educations)
-        .where(:id => (
-          Education.select(:member_id)
-                   .where('status = 0')
-                   .map(&:member_id) +
-        Tag.select(:member_id)
-           .where(:name => Tag.active_by_tag)
-           .map(&:member_id)
-        ))
+      @pagination, @members = pagy(
+        Member.includes(:educations).active
         .select(:id, :first_name, :infix, :last_name, :phone_number, :email, :student_id)
-        .order(:last_name, :first_name)
-        .paginate(page: params[:page], per_page: params[:limit] ||= 50)
+        .order(:last_name, :first_name))
 
     end
   end
@@ -42,6 +17,7 @@ class Admin::MembersController < ApplicationController
   # As defined above this is an json call only
   def search
     @members = Member.select(:id, :first_name, :infix, :last_name, :student_id).search(params[:search])
+    # TODO if all integers use like %
   end
 
   def show
@@ -57,11 +33,10 @@ class Admin::MembersController < ApplicationController
     # Pagination for checkout transactions
     @limit = params[:limit] ? params[:limit].to_i : 10
 
-    @transactions = CheckoutTransaction
-                    .where(:checkout_balance => CheckoutBalance
-                    .find_by_member_id(params[:id]))
-                    .order(created_at: :desc)
-                    .paginate(page: params[:page], per_page: params[:limit] ||= 10)
+    @pagination, @transactions = pagy(CheckoutTransaction
+      .where(:checkout_balance => CheckoutBalance
+      .find_by_member_id(params[:id]))
+      .order(created_at: :desc), items: 10)
   end
 
   def new
@@ -87,7 +62,6 @@ class Admin::MembersController < ApplicationController
 
       # If the member hasn't filled in a study, again show an empty field
       @member.educations.build(:id => '-1') if @member.educations.empty?
-
       render 'new'
     end
   end

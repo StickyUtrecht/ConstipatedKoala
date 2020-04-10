@@ -79,20 +79,23 @@
             = f.time_field :end_time, :value => (I18n.l(@activity.end_time, :format => :short) unless @activity.end_time.nil?), :class => 'form-control'
       .form-group
         .row
-          .col-md-12
+          .col-md-6
             = label(:activity, :unenroll_date)
             = f.date_field :unenroll_date, :value => @activity.unenroll_date, :class => 'form-control'
+
+          .col-md-6
+            = f.label :participant_limit
+            = f.number_field :participant_limit, min: 0, value: @activity.participant_limit, class: 'form-control'
+
       .form-group
         .row
-          .col-md-12
+          .col-md-6
             = label(:activity, :location)
             = f.text_field :location, :class => 'form-control'
-      .form-group
-        .row
-          .col-md-12
+
+          .col-md-6
             = label(:activity, :organized_by)
-            .ui-select
-              = f.select :organized_by, options_for_select(Group.has_members.order(:category, :name).map{ |group| [group.name, group.id] }, @activity.organized_by), :include_blank => '-'
+            = f.select :organized_by, options_for_select(Group.has_members.order(:category, :name).map{ |group| [group.name, group.id] }, @activity.organized_by), { include_blank: '-'}, {class: 'custom-select'}
 
       .form-group
         .row
@@ -122,7 +125,7 @@
             = f.check_box :is_viewable, checked: @activity.is_viewable || @activity.name.nil?, data: {original: @activity.is_viewable}
             = f.label :is_viewable
           .col-md-4
-            = f.check_box :show_on_website, checked: @activity.show_on_website, disabled: !@activity.is_viewable, data: {original: @activity.show_on_website}
+            = f.check_box :show_on_website, checked: @activity.show_on_website, value: @activity.show_on_website
             = f.label :show_on_website
           .col-md-4
             = f.check_box :is_freshmans, checked: @activity.is_freshmans
@@ -130,7 +133,7 @@
 
         .row
           .col-md-4
-            = f.check_box :is_enrollable, checked: @activity.is_enrollable, disabled: !@activity.is_viewable, data: {original: @activity.is_enrollable}
+            = f.check_box :is_enrollable, checked: @activity.is_enrollable
             = f.label :is_enrollable
           .col-md-4
             = f.check_box :is_alcoholic, checked: @activity.is_alcoholic
@@ -139,15 +142,10 @@
             = f.check_box :is_masters, checked: @activity.is_masters
             = f.label :is_masters
 
-      .form-group
-        .row
-          .col-lg-6
-            = f.label :participant_limit
-            = f.number_field :participant_limit, min: 0, disabled: !@activity.is_enrollable, data: {original: @activity.participant_limit}, id: "participant_limit"
 
       %button.btn.btn-success.wait{type: 'submit'}= I18n.t("editing.save")
       - if (@activity.id)
-        = link_to I18n.t("navigation.back"), :back, { :class => 'button btn btn-default' }
+        = link_to I18n.t("navigation.back"), :back, { :class => 'button btn btn-light' }
         = link_to I18n.t("editing.delete"), activity_path(@activity.id), { :class => 'button btn btn-danger float-right', 'data-method' => :delete }
       - else
-        = link_to I18n.t("editing.cancel"), activities_path, { :class => 'button btn btn-default' }
+        = link_to I18n.t("editing.cancel"), activities_path, { :class => 'button btn btn-light' }

@@ -8,7 +8,7 @@ Rails.application.routes.draw do
     end
   end
 
-  constraints :subdomain => ['koala', 'koala.dev', 'leden', 'leden.dev', 'members', 'members.dev'] do
+  constraints :subdomain => ['koala', 'koala.dev2', 'leden', 'leden.dev', 'members', 'members.dev'] do
     authenticate :user, ->(u) { !u.admin? } do
       scope module: 'members' do
         root to: 'home#index', as: :users_root

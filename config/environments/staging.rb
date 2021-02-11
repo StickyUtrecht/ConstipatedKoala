@@ -82,20 +82,20 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.action_mailer.default_url_options = {
-    :host => 'koala.dev.svsticky.nl',
+    :host => 'koala.dev2.svsticky.nl',
     :protocol => 'https'
   }
 
   # default host for url_helpers
   Rails.application.routes.default_url_options = {
-    :host => 'koala.dev.svsticky.nl',
+    :host => 'koala.dev2.svsticky.nl',
     :protocol => 'https'
   }
 
-  config.hosts << "koala.dev.svsticky.nl"
-  config.hosts << "intro.dev.svsticky.nl"
-  config.hosts << "leden.dev.svsticky.nl"
-  config.hosts << "members.dev.svsticky.nl"
+  config.hosts << "koala.dev2.svsticky.nl"
+  config.hosts << "intro.dev2.svsticky.nl"
+  config.hosts << "leden.dev2.svsticky.nl"
+  config.hosts << "members.dev2.svsticky.nl"
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = ::Logger::Formatter.new

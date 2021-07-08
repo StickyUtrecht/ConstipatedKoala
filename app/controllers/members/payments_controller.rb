@@ -18,7 +18,11 @@ class Members::PaymentsController < ApplicationController
              .where(activity_id: params[:activity_ids], member: member, reservist: false)
              .joins(:activity)
              .where(:activities => { is_payable: true })
-    description = "Activiteiten - #{ unpaid.map { |p| p.activity.id.to_s } }"
+    activity_names_for_unpaid = unpaid.map { |p| p.activity.name }
+
+    description_prefix = "Activiteiten - "
+    description_length_remaining = 140 - description_prefix.length
+    description = "#{ description_prefix }#{ join_with_char_limit(activity_names_for_unpaid, ', ', description_length_remaining) }"
     amount = unpaid.sum(&:currency)
 
     if amount < 1
@@ -42,6 +46,29 @@ class Members::PaymentsController < ApplicationController
       flash[:notice] = I18n.t('failed', scope: 'activerecord.errors.models.payment')
       redirect_to member_payments_path
     end
+  end
+
+  def self.join_with_char_limit(collection, separator, maxlength)
+    all_joined = collection.join separator
+    return all_joined if all_joined.length <= maxlength
+
+    suffix_mkr = ->(cnt) { " & #{ cnt } meer" }
+    remaining_length = maxlength - (collection[0].length + suffix_mkr.call(collection.length).length)
+
+    return ".. & #{ collection.length } meer" if remaining_length < 0
+
+    index = 1
+    while index < collection.length - 1
+      remaining_length -= collection[index].length + separator.length
+      if remaining_length < collection[index - 1].length + separator.length
+        index += 1
+        slice = collection.slice(0, index)
+        return "#{ slice.join separator } & #{ collection.length - index } meer"
+      end
+      index -= 1
+    end
+
+    return ".. & #{ collection.length } meer"
   end
 
   def add_funds

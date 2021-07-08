@@ -43,3 +43,4 @@ signing-key.pem
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+*.code-workspace

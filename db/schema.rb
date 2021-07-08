@@ -268,7 +268,20 @@ ActiveRecord::Schema.define(version: 2021_06_02_141708) do
     t.index ["trxid"], name: "index_payments_on_trxid", unique: true
   end
 
-  create_table "settings", id: :serial, force: :cascade do |t|
+  create_table "posts", id: :integer, force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.integer "status", default: 0, null: false
+    t.string "tags"
+    t.string "author_type", null: false
+    t.bigint "author_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "published_at"
+    t.index ["author_type", "author_id"], name: "index_posts_on_author_type_and_author_id"
+  end
+
+  create_table "settings", id: :integer, force: :cascade do |t|
     t.string "var", null: false
     t.text "value"
     t.integer "thing_id"

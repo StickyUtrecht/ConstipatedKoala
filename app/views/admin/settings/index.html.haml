@@ -156,15 +156,40 @@
                     = I18n.t('activerecord.attributes.member.language')
                     = f.select :language, options_for_select([["Nederlands", :nl], ["English", :en]], selected: @user.language)
 
+                .row
+                  .col-lg-12.avatar-view
+                    = label(:admin, :avatar)
+                    .image-group
+                      - if @admin.avatar.attached?
+                        = image_tag @admin.avatar, class: 'preview-avatar avatar'
+                    
+                    .image-side
+                      .input-group
+                        %input#output.form-control{ :readonly => '', :value => ("#{@admin.avatar.filename}" if @admin.avatar.attached?) }
+
+                        .input-group-append
+                          %div.btn.btn-primary.file-input-wrapper
+                            %span
+                              = I18n.t('files.upload')
+                            = f.file_field :avatar, { 'data-ui-file-upload' => '' }
+                        .input-group-append
+                          %button.btn.btn-primary.dropdown-toggle{ 'data-toggle' => 'dropdown', :type => 'button', :class => ( 'disabled' unless @admin.avatar.attached? ) }
+                            %span.caret
+                          %ul.dropdown-menu
+                            %li
+                              - if @admin.avatar.attached?
+                                = link_to 'Download', @admin.avatar, :download => '', :class => 'dropdown-item'
+                            %li.divider
+                            %li
+                              = link_to I18n.t('files.delete'), '#', :class => 'dropdown-item remove'
+
               .form-group#mail
                 %label{for: ''}
                 = I18n.t('admin.settings.signature')
-                = render 'layouts/partials/editor'
+                = f.hidden_field :signature, :class => 'form-control', :id => 'html'
 
-                #textarea.form-control{ :contenteditable => 'true' }
+                #editor
                   != @admin.signature
-
-                = f.text_area :signature, :rows => 8, :value => @admin.signature, :class => 'form-control', :id => 'html'
 
               %button.btn.btn-success{type: 'submit'}
                 = I18n.t('editing.save')

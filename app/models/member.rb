@@ -28,7 +28,6 @@ class Member < ApplicationRecord
 
   enum consent: [:pending, :yearly, :indefinite]
 
-  fuzzily_searchable :query
   is_impressionable :dependent => :ignore
 
   # NOTE: prepend true is required, so that it is executed before dependent => destroy
@@ -85,6 +84,15 @@ class Member < ApplicationRecord
 
   scope :studying, -> { where(id: Education.where(status: :active)) }
   scope :alumni, -> { where.not(id: Education.where(status: :active)) }
+
+  include PgSearch::Model
+  pg_search_scope :search_by_name,
+                  against: [:first_name, :infix, :last_name, :phone_number, :email, :student_id],
+                  using: {
+                    trigram: {
+                      threshold: 0.1
+                    }
+                  }
 
   # An attribute can be changed on setting, for example the names are starting with a cap
   def first_name=(first_name)
@@ -188,17 +196,12 @@ class Member < ApplicationRecord
 
   # Functions starting with self are functions on the model not an instance. For example we can now search for members by calling Member.search with a query
   def self.search(query)
-    student_id = query.match(/^\F?\d{6,7}$/i)
-    return where("student_id like ?", "%#{ student_id }%") unless student_id.nil?
-
-    phone_number = query.match(/^(?:\+\d{2}|00\d{2}|0)(\d{9})$/)
-    return where("phone_number like ?", "%#{ phone_number[1] }") unless phone_number.nil?
-
-    # If query is blank, no need to filter. Default behaviour would be to return Member class, so we override by passing all
+    # If query is blank, no need to filter. Default behaviour would be to return Member class, but we override by passing all active and studying members
     return where(:id => (Education.select(:member_id).where('status = 0').map(&:member_id) + Tag.select(:member_id).where(:name => Tag.active_by_tag).map(&:member_id))) if query.blank?
 
+    # Otherwise we apply the filters and perform a fuzzy search on full name, phone number and email address
     records = filter(query)
-    return records.find_by_fuzzy_query(query) unless query.blank?
+    return records.search_by_name(query) unless query.blank?
 
     return records
   end
